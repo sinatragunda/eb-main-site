@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from "react-router";
 import { Search, Building2 } from "lucide-react";
 import { NAVY, TEAL } from "../../constants/brand";
 import { LoginPanel } from "../account/LoginPanel";
+import {authService} from "@/app/services/http";
+import {AccountPanel} from "@/app/components/account/AccountPanel.tsx";
 
 const NAV_ITEMS = [
   { label: "Home", to: "/" },
@@ -15,7 +17,20 @@ const NAV_ITEMS = [
 export function SharedNav() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [accountOpen, setAccountOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
+
+  const onLoginSuccess = () => {
+      authService.me().then((userDetails) => {
+          localStorage.setItem('eb_user_details', JSON.stringify(userDetails));
+          setLoginOpen(false);
+          setAccountOpen(true);
+          navigate("/marketplace");
+      } ,(error) => {
+          console.log(error);
+          setLoginOpen(true);
+      });
+  }
 
   const activePage =
     location.pathname === "/single-family"
@@ -89,10 +104,12 @@ export function SharedNav() {
         </div>
       </nav>
 
+      <AccountPanel isOpen={accountOpen} onClose={()=>{}}/>
+
       <LoginPanel
         isOpen={loginOpen}
         onClose={() => setLoginOpen(false)}
-        onSuccess={() => navigate("/marketplace")}
+        onSuccess={() => onLoginSuccess()}
       />
     </>
   );

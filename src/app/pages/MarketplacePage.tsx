@@ -14,11 +14,11 @@ import { GOLD, NAVY, TEAL } from "../constants/brand";
 import type { PricingTier } from "../types/marketplace";
 import { SERVICES } from "../data/services";
 import { CATEGORIES, SORT_OPTIONS } from "../data/categories";
-import { useCart } from "../context/CartContext";
 import { ServiceCard } from "../components/marketplace/ServiceCard";
 import { CartPanel } from "../components/marketplace/CartPanel";
 import { AccountPanel } from "../components/account/AccountPanel";
 import { LoginPanel } from "../components/account/LoginPanel";
+import { useCart } from "@/app/context/CartContext.tsx";
 
 type MarketplaceLocationState = {
   openAccount?: boolean;
@@ -27,7 +27,7 @@ type MarketplaceLocationState = {
 export function MarketplacePage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { cartItems, setCartItems } = useCart();
+  const { cartItems, addCartItem, removeCartItem, resetCartItems } = useCart();
   const locationState = (location.state as MarketplaceLocationState | null) ?? null;
 
   const [cartOpen, setCartOpen] = useState(false);
@@ -52,17 +52,18 @@ export function MarketplacePage() {
   }, [searchQuery]);
 
   const handleAddToCart = useCallback((serviceId: string, tier: PricingTier) => {
-    const service = SERVICES.find((s) => s.id === serviceId)!;
-    setCartItems((prev) => {
-      if (prev.some((c) => c.serviceId === serviceId && c.tierName === tier.name)) return prev;
-      return [...prev, { serviceId, serviceName: service.name, tierName: tier.name, price: tier.price, period: tier.period }];
-    });
+    addCartItem(serviceId, tier);
     setCartOpen(true);
-  }, [setCartItems]);
+  }, [addCartItem]);
 
   const handleRemove = useCallback((index: number) => {
-    setCartItems((prev) => prev.filter((_, i) => i !== index));
-  }, [setCartItems]);
+    removeCartItem(index);
+  }, [removeCartItem]);
+
+  const handleCheckout = useCallback(() => {
+    setCartOpen(false);
+    navigate("/checkout");
+  }, [navigate]);
 
   const filteredServices = useMemo(() => {
     let list = SERVICES.filter((s) => {
@@ -284,11 +285,16 @@ export function MarketplacePage() {
         isOpen={cartOpen}
         onClose={() => setCartOpen(false)}
         cartItems={cartItems}
+        resetCartItems={resetCartItems}
         onRemove={handleRemove}
         onQuantityChange={() => {}}
-        onCheckout={() => navigate("/checkout")}
+        onCheckout={handleCheckout}
       />
-      <LoginPanel isOpen={loginOpen} onClose={() => setLoginOpen(false)} onSuccess={() => {}} />
+      <LoginPanel
+        isOpen={loginOpen}
+        onClose={() => setLoginOpen(false)}
+        onSuccess={() => setLoginOpen(false)}
+      />
     </div>
   );
 }

@@ -1,9 +1,13 @@
 import type { ReactNode } from "react";
 
+
+
 export type PricingTier = {
+  id?: string;
   name: string;
   price: number;
   period: string;
+  description?: string;
   features: string[];
   popular?: boolean;
 };
@@ -14,6 +18,7 @@ export type Service = {
   category: string;
   description: string;
   icon: ReactNode;
+  cartOption?: boolean;
   rating: number;
   reviews: number;
   tiers: PricingTier[];

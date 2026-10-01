@@ -13,9 +13,22 @@ import {
 } from "lucide-react";
 import { NAVY, TEAL } from "../../constants/brand";
 import { MOCK_ACCOUNT, MOCK_SUBSCRIPTIONS, MOCK_HISTORY } from "../../data/mockAccount";
+import {UserDetails} from "@/app/services/http/types.ts";
 
 export function AccountPanel({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+
   const [tab, setTab] = useState<"overview" | "subscriptions" | "history">("overview");
+
+  const getUserDetails = () : UserDetails | null => {
+      const details = localStorage.getItem("eb_user_details");
+      if(details){
+          return JSON.parse(details) as UserDetails;
+      }
+      return null;
+  }
+
+  const [userDetails, setUserDetails] = useState<UserDetails | null>(getUserDetails);
+
 
   const activeCount = MOCK_SUBSCRIPTIONS.filter((s) => s.status === "active" || s.status === "expiring").length;
   const monthlySpend = MOCK_SUBSCRIPTIONS
@@ -44,8 +57,8 @@ export function AccountPanel({ isOpen, onClose }: { isOpen: boolean; onClose: ()
               {MOCK_ACCOUNT.name.split(" ").map((n) => n[0]).join("")}
             </div>
             <div>
-              <p className="font-semibold text-white">{MOCK_ACCOUNT.name}</p>
-              <p className="text-xs text-white/60">{MOCK_ACCOUNT.email}</p>
+              <p className="font-semibold text-white">{userDetails?.name}</p>
+              <p className="text-xs text-white/60">{userDetails?.email}</p>
             </div>
             <span className="ml-auto text-[10px] font-bold px-2 py-1 rounded border border-white/30" style={{ backgroundColor: "rgba(0,151,178,0.2)", color: "#7de0f0" }}>
               {MOCK_ACCOUNT.plan}

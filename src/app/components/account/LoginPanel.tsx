@@ -15,6 +15,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { NAVY, TEAL, GOLD } from "../../constants/brand";
+import { authService, HttpError } from "../../services/http";
 
 export function LoginPanel({
   isOpen,
@@ -33,24 +34,47 @@ export function LoginPanel({
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+
+  const login = async (e: React.FormEvent) => {
+
+      e.preventDefault();
+      setLoading(true);
+      try {
+          await authService.login({ email, password });
+          onSuccess();
+          onClose();
+      } catch (err) {
+          const message =
+              err instanceof HttpError
+                  ? err.message
+                  : err instanceof Error
+                      ? err.message
+                      : "Unable to sign in. Please try again.";
+          setError(message);
+      } finally {
+          setLoading(false);
+      }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     if (!email) { setError("Please enter your email address."); return; }
     if (mode === "login" && !password) { setError("Please enter your password."); return; }
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      if (mode === "login") {
-        onSuccess();
-        onClose();
-      } else if (mode === "forgot") {
-        setMode("login");
-        setEmail("");
-      } else {
-        setMode("login");
-      }
-    }, 1200);
+
+    if (mode !== "login") {
+      setLoading(true);
+      setTimeout(() => {
+        setLoading(false);
+        if (mode === "forgot") {
+          setMode("login");
+          setEmail("");
+        } else {
+          setMode("login");
+        }
+      }, 1200);
+      return;
+    }
   };
 
   // Reset state when panel closes
@@ -136,7 +160,7 @@ export function LoginPanel({
             </>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={login} className="space-y-4">
 
             {/* Email */}
             <div>

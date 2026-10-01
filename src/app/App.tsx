@@ -5,6 +5,13 @@ import { SingleFamilyBankingPage } from "./pages/SingleFamilyBankingPage";
 import { MarketplacePage } from "./pages/MarketplacePage";
 import { PaymentsPage } from "./pages/PaymentsPage";
 
+
+// Sentry.init({
+//     dsn: process.env.SENTRY_DSN,
+//     // Effectively halts all Sentry event transmission completely
+//     enabled: false
+// });
+
 export default function App() {
   return (
     <BrowserRouter>

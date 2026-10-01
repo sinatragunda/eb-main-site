@@ -18,7 +18,9 @@ export const ServiceCard = memo(function ServiceCard({
   );
 
   const tier = service.tiers[selectedTier];
-  const isInCart = cartItems.some((c) => c.serviceId === service.id && c.tierName === tier.name);
+  const cartItemForService = cartItems.find((c) => c.serviceId === service.id);
+  const isCurrentTierInCart = cartItemForService?.tierName === tier.name;
+  const canSwitchPlan = Boolean(cartItemForService && !isCurrentTierInCart);
 
   return (
     <div className="bg-card border border-border rounded-lg overflow-hidden flex flex-col hover:shadow-md transition-shadow duration-200">
@@ -106,16 +108,18 @@ export const ServiceCard = memo(function ServiceCard({
       </div>
 
       <div className="px-4 pb-4">
-        <button
-          onClick={() => onAddToCart(service.id, tier)}
-          disabled={isInCart}
-          className={`w-full py-2 rounded text-sm font-semibold transition-all active:scale-[0.98] ${
-            isInCart ? "bg-muted text-muted-foreground cursor-default" : "text-white hover:opacity-90"
-          }`}
-          style={isInCart ? undefined : { backgroundColor: TEAL }}
-        >
-          {isInCart ? "✓ Added to cart" : "Add to Cart"}
-        </button>
+          {service.cartOption !== false && (
+            <button
+              onClick={() => onAddToCart(service.id, tier)}
+              disabled={isCurrentTierInCart}
+              className={`w-full py-2 rounded text-sm font-semibold transition-all active:scale-[0.98] ${
+                isCurrentTierInCart ? "bg-muted text-muted-foreground cursor-default" : "text-white hover:opacity-90"
+              }`}
+              style={isCurrentTierInCart ? undefined : { backgroundColor: TEAL }}
+            >
+              {isCurrentTierInCart ? "✓ Added to cart" : canSwitchPlan ? "Switch Plan" : "Add to Cart"}
+            </button>
+          )}
       </div>
     </div>
   );

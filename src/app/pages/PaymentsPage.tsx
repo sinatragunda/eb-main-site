@@ -1,22 +1,26 @@
-import { useState } from "react";
-import { useNavigate } from "react-router";
+import {useState} from "react";
+import {useNavigate} from "react-router";
 import {
-  ChevronLeft,
-  CheckCircle,
-  CreditCard,
-  Landmark,
-  Wallet,
-  Lock,
-  Shield,
-  Building2,
-  Check,
-  Mail,
-  AlertCircle,
-  CircleDollarSign,
-  CheckCircle2,
+    AlertCircle,
+    Building2,
+    Check,
+    CheckCircle,
+    CheckCircle2,
+    ChevronLeft,
+    CircleDollarSign,
+    CreditCard,
+    Landmark,
+    Lock,
+    Mail,
+    Shield,
+    Wallet,
 } from "lucide-react";
-import { GOLD, NAVY, TEAL } from "../constants/brand";
-import { useCart } from "../context/CartContext";
+import {GOLD, NAVY, TEAL} from "../constants/brand";
+import {useCart} from "../context/CartContext";
+import {authService, HttpError} from "../services/http";
+import {LoginPanel} from "../components/account/LoginPanel";
+import {httpResourceService} from "@/app/services/http/httpResourceService.ts";
+import {PAYMENT_TYPE, PaymentRequest} from "@/app/types/paymentrequest.ts";
 
 export function PaymentsPage() {
   const navigate = useNavigate();
@@ -24,7 +28,7 @@ export function PaymentsPage() {
   const goBack = () => navigate("/marketplace");
   const goSuccess = () => navigate("/marketplace", { state: { openAccount: true } });
 
-  const [payMethod, setPayMethod] = useState<"card" | "bank" | "wallet">("card");
+  const [payMethod, setPayMethod] = useState<PAYMENT_TYPE>(PAYMENT_TYPE.DEBIT_CREDIT_CARD);
   const [cardNumber, setCardNumber] = useState("");
   const [expiry, setExpiry] = useState("");
   const [cvv, setCvv] = useState("");
@@ -35,6 +39,9 @@ export function PaymentsPage() {
   const [saving, setSaving] = useState(false);
   const [paid, setPaid] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitError, setSubmitError] = useState("");
+  const [loginOpen, setLoginOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => authService.isAuthenticated());
 
   const subtotal = cartItems.reduce((s, i) => s + i.price, 0);
   const tax = subtotal * 0.15;
@@ -54,22 +61,88 @@ export function PaymentsPage() {
 
   const validate = () => {
     const e: Record<string, string> = {};
-    if (!email) e.email = "Email is required";
-    if (payMethod === "card") {
+    if (!isLoggedIn) {
+      if (!email.trim()) e.email = "Email is required";
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) e.email = "Enter a valid email address";
+    }
+    if (payMethod === PAYMENT_TYPE.DEBIT_CREDIT_CARD) {
       if (cardNumber.replace(/\s/g, "").length < 16) e.card = "Enter a valid 16-digit card number";
       if (expiry.replace(/\s\/\s/g, "").length < 4) e.expiry = "Enter a valid expiry date";
       if (cvv.length < 3) e.cvv = "Enter a valid CVV";
-      if (!cardName) e.cardName = "Cardholder name is required";
+      if (!cardName.trim()) e.cardName = "Cardholder name is required";
     }
     setErrors(e);
     return Object.keys(e).length === 0;
   };
 
-  const handlePay = (e: React.FormEvent) => {
+  const handlePay = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitError("");
     if (!validate()) return;
+
     setSaving(true);
-    setTimeout(() => { setSaving(false); setPaid(true); }, 2000);
+    try {
+      // Create a default account from checkout email if the user is not already signed in
+
+        if(!isLoggedIn && !authService.isAuthenticated()) {
+            const defaultAccount = {
+                email: email,
+                alias: alias,
+                clientName: clientName
+            }
+
+            const accountDetails = await authService.createDefaultAccount(defaultAccount);
+
+            setIsLoggedIn(true);
+      }
+
+      const getPaymentDetails = ()=>{
+          switch (payMethod) {
+              case PAYMENT_TYPE.DEBIT_CREDIT_CARD:
+                  return {
+                     name: cardName,
+                     cardNumber: cardNumber,
+                     expiry: expiry,
+                     cvv: cvv,
+                     country: country,
+                     zip: zip
+                  }
+                  break;
+              case PAYMENT_TYPE.WALLET:
+                  return {}
+              break;
+
+          }
+      }
+
+      const paymentRequest : PaymentRequest = {
+          email : email.trim() ,
+          name : cardName.trim(),
+          paymentType : payMethod,
+          cartItems : cartItems,
+          paymentDetails : getPaymentDetails()
+      };
+
+      const paymentResponse =  await httpResourceService.makePayment(paymentRequest);
+
+      if(paymentResponse){
+          // login user and get their details
+      }
+
+      // Payment processing placeholder — swap for real payment API when ready
+
+      setPaid(true);
+    } catch (err) {
+      const message =
+        err instanceof HttpError
+          ? err.message
+          : err instanceof Error
+            ? err.message
+            : "Unable to create your account. Please try again.";
+      setSubmitError(message);
+    } finally {
+      setSaving(false);
+    }
   };
 
   // ── Success screen ──
@@ -81,11 +154,11 @@ export function PaymentsPage() {
             <CheckCircle className="w-8 h-8" style={{ color: TEAL }} />
           </div>
           <div style={{ width: 36, height: 4, backgroundColor: GOLD, borderRadius: 2, margin: "0 auto 16px" }} />
-          <h2 className="text-2xl font-bold mb-2" style={{ color: NAVY }}>Payment Successful!</h2>
+          <h2 className="text-2xl font-bold mb-2" style={{ color: NAVY }}>You&apos;re all set!</h2>
           <p className="text-muted-foreground text-sm mb-2">
-            Your payment of <span className="font-bold text-foreground">${total.toFixed(2)}</span> has been processed.
+            Your payment of <span className="font-bold text-foreground">${total.toFixed(2)}</span> has been processed and your default account has been created.
           </p>
-          <p className="text-muted-foreground text-xs mb-6">A confirmation receipt has been sent to <span className="font-semibold text-foreground">{email || "your email"}</span>.</p>
+          <p className="text-muted-foreground text-xs mb-6">Account details and a receipt were sent to <span className="font-semibold text-foreground">{email || "your email"}</span>.</p>
           <div className="bg-muted/50 rounded-lg p-4 mb-6 text-left space-y-1">
             {cartItems.map((item, i) => (
               <div key={i} className="flex justify-between text-xs">
@@ -183,21 +256,51 @@ export function PaymentsPage() {
 
           {/* Contact */}
           <div className="bg-white rounded-xl border border-border p-6">
-            <h2 className="font-bold text-base mb-4" style={{ color: NAVY }}>Contact Information</h2>
-            <div>
-              <label className="block text-xs font-semibold text-foreground mb-1.5">Email address</label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  className={`${inputCls("email")} pl-9`}
-                />
+            <div className="flex items-start justify-between gap-3 mb-4">
+              <div>
+                <h2 className="font-bold text-base mb-1" style={{ color: NAVY }}>Contact Information</h2>
+                <p className="text-xs text-muted-foreground">
+                  {isLoggedIn
+                    ? "You're signed in — we'll use your existing account."
+                    : "We'll use this email to create your default client account."}
+                </p>
               </div>
-              {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email}</p>}
             </div>
+
+            {isLoggedIn ? (
+              <div className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm" style={{ backgroundColor: "#ddf0f4", color: TEAL }}>
+                <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+                <span className="font-medium">Signed in — continue to payment below</span>
+              </div>
+            ) : (
+              <>
+                <div>
+                  <label className="block text-xs font-semibold text-foreground mb-1.5">Email address</label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@example.com"
+                      className={`${inputCls("email")} pl-9`}
+                    />
+                  </div>
+                  {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email}</p>}
+                </div>
+                <p className="text-xs text-muted-foreground mt-3">
+                  Already have an account?&nbsp;{" "}
+                  <button
+                    type="button"
+                    onClick={() => setLoginOpen(true)}
+                    className="font-semibold hover:underline"
+                    style={{ color: TEAL }}
+                  >
+                    Login first
+                  </button>
+                </p>
+              </>
+            )}
           </div>
 
           {/* Payment method tabs */}
@@ -210,16 +313,16 @@ export function PaymentsPage() {
             {/* Tabs */}
             <div className="flex rounded-lg border border-border overflow-hidden mb-6">
               {([
-                { id: "card", label: "Credit / Debit Card", icon: <CreditCard className="w-4 h-4" /> },
-                { id: "bank", label: "Bank Transfer", icon: <Landmark className="w-4 h-4" /> },
+                { id: "card",paymentType : PAYMENT_TYPE.DEBIT_CREDIT_CARD , label: "Credit / Debit Card", icon: <CreditCard className="w-4 h-4" /> },
+                { id: "bank",paymentType: PAYMENT_TYPE.BANK_TRANSFER , label: "Bank Transfer", icon: <Landmark className="w-4 h-4" /> },
                 { id: "wallet", label: "Digital Wallet", icon: <Wallet className="w-4 h-4" /> },
               ] as const).map((m, i) => (
                 <button
                   key={m.id}
                   type="button"
-                  onClick={() => setPayMethod(m.id)}
+                  onClick={() => setPayMethod(m.paymentType)}
                   className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-semibold transition-colors ${i > 0 ? "border-l border-border" : ""}`}
-                  style={payMethod === m.id ? { backgroundColor: NAVY, color: "white" } : { color: "#52708a" }}
+                  style={payMethod === m.paymentType ? { backgroundColor: NAVY, color: "white" } : { color: "#52708a" }}
                 >
                   {m.icon} {m.label}
                 </button>
@@ -227,7 +330,7 @@ export function PaymentsPage() {
             </div>
 
             {/* Card form */}
-            {payMethod === "card" && (
+            {payMethod === PAYMENT_TYPE.DEBIT_CREDIT_CARD && (
               <div className="space-y-4">
                 <div>
                   <label className="block text-xs font-semibold text-foreground mb-1.5">Card number</label>
@@ -287,7 +390,7 @@ export function PaymentsPage() {
             )}
 
             {/* Bank Transfer */}
-            {payMethod === "bank" && (
+            {payMethod === PAYMENT_TYPE.BANK_TRANSFER && (
               <div className="rounded-lg border border-border p-5 space-y-3 text-sm">
                 <p className="font-semibold text-foreground mb-3">Transfer to our account</p>
                 {[
@@ -310,7 +413,7 @@ export function PaymentsPage() {
             )}
 
             {/* Digital Wallet */}
-            {payMethod === "wallet" && (
+            {payMethod === PAYMENT_TYPE.WALLET && (
               <div className="space-y-3">
                 {[
                   { name: "Google Pay", color: "#4285F4", icon: (
@@ -348,7 +451,7 @@ export function PaymentsPage() {
           </div>
 
           {/* Billing address */}
-          {payMethod === "card" && (
+          {payMethod === PAYMENT_TYPE.DEBIT_CREDIT_CARD && (
             <div className="bg-white rounded-xl border border-border p-6">
               <h2 className="font-bold text-base mb-4" style={{ color: NAVY }}>Billing Address</h2>
               <div className="grid grid-cols-2 gap-4">
@@ -379,8 +482,15 @@ export function PaymentsPage() {
             </div>
           )}
 
+          {submitError && (
+            <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+              <span>{submitError}</span>
+            </div>
+          )}
+
           {/* Pay button — card only (wallets have their own) */}
-          {payMethod !== "wallet" && (
+          {payMethod !== PAYMENT_TYPE.WALLET && (
             <button
               type="submit"
               disabled={saving}
@@ -390,12 +500,12 @@ export function PaymentsPage() {
               {saving ? (
                 <>
                   <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                  Processing…
+                  Creating account &amp; processing…
                 </>
               ) : (
                 <>
                   <Lock className="w-4 h-4" />
-                  {payMethod === "bank" ? "Confirm & Get Account Details" : `Pay $${total.toFixed(2)} Securely`}
+                  {payMethod === PAYMENT_TYPE.BANK_TRANSFER ? "Confirm & Create Account" : `Pay $${total.toFixed(2)} & Create Account`}
                 </>
               )}
             </button>
@@ -468,6 +578,21 @@ export function PaymentsPage() {
           </p>
         </div>
       </div>
+
+      <LoginPanel
+        isOpen={loginOpen}
+        onClose={() => setLoginOpen(false)}
+        onSuccess={() => {
+          setIsLoggedIn(true);
+          setLoginOpen(false);
+          setSubmitError("");
+          setErrors((prev) => {
+            const next = { ...prev };
+            delete next.email;
+            return next;
+          });
+        }}
+      />
     </div>
   );
 }
