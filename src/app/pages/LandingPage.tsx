@@ -9,7 +9,7 @@ import {
   Check,
   ShoppingCart,
 } from "lucide-react";
-import { GOLD, NAVY, TEAL } from "../constants/brand";
+import { CREAM, GOLD, MIST, NAVY, TEAL } from "../constants/brand";
 import { HERO_SLIDES } from "../data/heroSlides";
 import { SharedNav } from "../components/layout/SharedNav";
 import { SharedFooter } from "../components/layout/SharedFooter";
@@ -60,7 +60,7 @@ export function LandingPage() {
   const current = HERO_SLIDES[slide];
 
   return (
-    <div className="min-h-screen bg-white text-foreground" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+    <div className="min-h-screen text-foreground" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", backgroundColor: CREAM }}>
 
       <SharedNav />
 
@@ -101,9 +101,10 @@ export function LandingPage() {
             <button
               onClick={goToMarketplace}
               className="flex items-center gap-2 border-2 border-white text-white px-6 py-2.5 rounded-full font-semibold text-sm hover:bg-white transition-colors group"
+              style={{ ["--navy" as string]: NAVY }}
             >
-              <span className="group-hover:text-[#0d3349] transition-colors">{current.cta}</span>
-              <ArrowRight className="w-4 h-4 group-hover:text-[#0d3349] transition-colors" />
+              <span className="group-hover:text-[color:var(--navy)] transition-colors">{current.cta}</span>
+              <ArrowRight className="w-4 h-4 group-hover:text-[color:var(--navy)] transition-colors" />
             </button>
           </div>
         </div>
@@ -203,7 +204,7 @@ export function LandingPage() {
           <div className="md:pt-2">
             {/* Gold accent bar */}
             <div style={{ width: 36, height: 4, backgroundColor: GOLD, marginBottom: 16, borderRadius: 2 }} />
-            <div className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4" style={{ color: NAVY, backgroundColor: "#ddf0f4", fontFamily: "'JetBrains Mono', monospace" }}>
+            <div className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4" style={{ color: NAVY, backgroundColor: MIST, fontFamily: "'JetBrains Mono', monospace" }}>
               <Building2 className="w-3 h-3" /> Financial Services
             </div>
             <h2 className="text-3xl font-bold mb-3" style={{ color: NAVY }}>Banking & Digital Infrastructure</h2>
@@ -291,7 +292,7 @@ export function LandingPage() {
             </p>
             <div className="flex flex-wrap gap-2">
               {["FCA Regulated", "ISO 27001 Certified", "GDPR Compliant", "SOC 2 Type II"].map((b) => (
-                <span key={b} className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full" style={{ backgroundColor: "#ddf0f4", color: TEAL }}>
+                <span key={b} className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full" style={{ backgroundColor: MIST, color: TEAL }}>
                   <Check className="w-3 h-3" /> {b}
                 </span>
               ))}

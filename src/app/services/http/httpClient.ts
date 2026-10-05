@@ -28,7 +28,6 @@ export function getAuthToken(): string | null {
   try {
     return localStorage.getItem(EB_AUTH_TOKEN_KEY);
   } catch(error) {
-      alert(JSON.stringify(error));
     return null;
   }
 }

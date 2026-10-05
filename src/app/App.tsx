@@ -4,13 +4,8 @@ import { LandingPage } from "./pages/LandingPage";
 import { SingleFamilyBankingPage } from "./pages/SingleFamilyBankingPage";
 import { MarketplacePage } from "./pages/MarketplacePage";
 import { PaymentsPage } from "./pages/PaymentsPage";
-
-
-// Sentry.init({
-//     dsn: process.env.SENTRY_DSN,
-//     // Effectively halts all Sentry event transmission completely
-//     enabled: false
-// });
+import { ClientSetupPage } from "./pages/ClientSetupPage";
+import { FirstStepsPage } from "./pages/FirstStepsPage";
 
 export default function App() {
   return (
@@ -18,8 +13,10 @@ export default function App() {
       <CartProvider>
         <Routes>
           <Route path="/" element={<LandingPage />} />
+          <Route path="/first-steps" element={<FirstStepsPage />} />
           <Route path="/single-family" element={<SingleFamilyBankingPage />} />
           <Route path="/marketplace" element={<MarketplacePage />} />
+          <Route path="/checkout/setup" element={<ClientSetupPage />} />
           <Route path="/checkout" element={<PaymentsPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

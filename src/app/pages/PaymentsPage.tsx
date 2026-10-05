@@ -15,9 +15,9 @@ import {
     Shield,
     Wallet,
 } from "lucide-react";
-import {GOLD, NAVY, TEAL} from "../constants/brand";
+import {CREAM, GOLD, MIST, NAVY, TEAL} from "../constants/brand";
 import {useCart} from "../context/CartContext";
-import {authService, HttpError} from "../services/http";
+import {AuthService, HttpError} from "../services/http";
 import {LoginPanel} from "../components/account/LoginPanel";
 import {httpResourceService} from "@/app/services/http/httpResourceService.ts";
 import {PAYMENT_TYPE, PaymentRequest} from "@/app/types/paymentrequest.ts";
@@ -41,7 +41,7 @@ export function PaymentsPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState("");
   const [loginOpen, setLoginOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(() => authService.isAuthenticated());
+  const [isLoggedIn, setIsLoggedIn] = useState(() => AuthService.isAuthenticated());
 
   const subtotal = cartItems.reduce((s, i) => s + i.price, 0);
   const tax = subtotal * 0.15;
@@ -84,14 +84,14 @@ export function PaymentsPage() {
     try {
       // Create a default account from checkout email if the user is not already signed in
 
-        if(!isLoggedIn && !authService.isAuthenticated()) {
+        if(!isLoggedIn && !AuthService.isAuthenticated()) {
             const defaultAccount = {
                 email: email,
                 alias: alias,
                 clientName: clientName
             }
 
-            const accountDetails = await authService.createDefaultAccount(defaultAccount);
+            const accountDetails = await AuthService.createDefaultAccount(defaultAccount);
 
             setIsLoggedIn(true);
       }
@@ -148,9 +148,9 @@ export function PaymentsPage() {
   // ── Success screen ──
   if (paid) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center px-6" style={{ backgroundColor: "#f3f6f8", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+      <div className="min-h-screen flex flex-col items-center justify-center px-6" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", backgroundColor: CREAM }}>
         <div className="bg-white rounded-2xl shadow-sm border border-border p-10 max-w-md w-full text-center">
-          <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5" style={{ backgroundColor: "#ddf0f4" }}>
+          <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5" style={{ backgroundColor: MIST }}>
             <CheckCircle className="w-8 h-8" style={{ color: TEAL }} />
           </div>
           <div style={{ width: 36, height: 4, backgroundColor: GOLD, borderRadius: 2, margin: "0 auto 16px" }} />
@@ -208,7 +208,7 @@ export function PaymentsPage() {
   );
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "#f3f6f8", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+    <div className="min-h-screen" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", backgroundColor: CREAM }}>
       {/* Header */}
       <div className="bg-white border-b border-border">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -268,7 +268,7 @@ export function PaymentsPage() {
             </div>
 
             {isLoggedIn ? (
-              <div className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm" style={{ backgroundColor: "#ddf0f4", color: TEAL }}>
+              <div className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm" style={{ backgroundColor: MIST, color: TEAL }}>
                 <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
                 <span className="font-medium">Signed in — continue to payment below</span>
               </div>

@@ -9,7 +9,7 @@ import {
 } from "react";
 import type { CartItem, PricingTier } from "../types/marketplace";
 import { SERVICES } from "@/app/data/services.tsx";
-import { authService } from "../services/http";
+import { AuthService } from "../services/http";
 
 export const CORE_BANKING_SERVICE_ID = "core-banking";
 
@@ -73,7 +73,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const isLoggedIn = useCallback(() => authService.isAuthenticated(), []);
+  const isLoggedIn = useCallback(() => AuthService.isAuthenticated(), []);
 
   const addCartItem = useCallback((serviceId: string, tier: PricingTier) => {
     const next = toCartItem(serviceId, tier);

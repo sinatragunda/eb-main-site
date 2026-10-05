@@ -15,7 +15,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { NAVY, TEAL, GOLD } from "../../constants/brand";
-import { authService, HttpError } from "../../services/http";
+import { AuthService, HttpError } from "../../services/http";
 
 export function LoginPanel({
   isOpen,
@@ -40,7 +40,7 @@ export function LoginPanel({
       e.preventDefault();
       setLoading(true);
       try {
-          await authService.login({ email, password });
+          await AuthService.login({ email, password });
           onSuccess();
           onClose();
       } catch (err) {

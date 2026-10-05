@@ -13,7 +13,7 @@ const AUTH_PATHS = {
   createDefaultAccount: "/accounts",
 } as const;
 
-export const authService = {
+export const AuthService = {
   async login(credentials: LoginRequest): Promise<LoginResponse> {
     const data = await http.post<LoginResponse>(AUTH_PATHS.login, credentials, {
       skipAuth: true,
@@ -32,7 +32,15 @@ export const authService = {
   ): Promise<CreateDefaultAccountResponse> {
     const data = await http.post<CreateDefaultAccountResponse>(
       AUTH_PATHS.createDefaultAccount,
-      payload,
+      {
+        email: payload.email,
+        alias: payload.alias,
+        clientName: payload.clientName,
+        metadata: {
+          rootPassword: payload.rootPassword,
+          ...(payload.metadata ?? {}),
+        },
+      },
       { skipAuth: true }
     );
 
@@ -55,7 +63,7 @@ export const authService = {
   },
 
   isAuthenticated(): boolean {
-    return Boolean(getAuthToken());
+    return Boolean(this.me());
   },
 
   getToken(): string | null {

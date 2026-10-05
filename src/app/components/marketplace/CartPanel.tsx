@@ -1,9 +1,10 @@
 import {X, Package, Trash2, ArrowRight, Tag, Lock, CircleX} from "lucide-react";
-import {NAVY, RED, TEAL} from "../../constants/brand";
+import {MIST, NAVY, RED, TEAL} from "../../constants/brand";
 import type { CartItem } from "../../types/marketplace";
 import { CORE_BANKING_SERVICE_ID } from "../../context/CartContext";
 import { Pocketsflow}   from "pocketsflow";
-import {redirect} from "react-router";
+import {redirect, useNavigate} from "react-router";
+import {AuthService} from "@/app/services/http";
 
 
 export function CartPanel({
@@ -23,13 +24,24 @@ export function CartPanel({
   onQuantityChange: (index: number, delta: number) => void;
   onCheckout: () => void;
 }) {
+
+  const navigate = useNavigate();
+
   const total = cartItems.reduce((sum, item) => sum + item.price, 0);
 
   const clearCart = () => { 
     resetCartItems();
   };
 
-  const pocketflow = async () => {
+  const pocketflowCheckout = async () => {
+
+      const isAuthenticated = AuthService.isAuthenticated();
+
+      alert(isAuthenticated);
+
+      if(!isAuthenticated){
+          navigate('/checkout/setup');
+      }
 
       const isSuscription = true ;
       const pf = new Pocketsflow({
@@ -132,7 +144,7 @@ export function CartPanel({
                         </p>
                       </div>
                       {isCore ? (
-                        <span className="text-[10px] font-semibold px-2 py-1 rounded flex-shrink-0" style={{ backgroundColor: "#ddf0f4", color: TEAL }}>
+                        <span className="text-[10px] font-semibold px-2 py-1 rounded flex-shrink-0" style={{ backgroundColor: MIST, color: TEAL }}>
                           Core
                         </span>
                       ) : (
@@ -169,8 +181,7 @@ export function CartPanel({
 
                   <button
                       onClick={() => {
-                          pocketflow();
-                          //onCheckout();
+                          pocketflowCheckout();
                       }}
                       className="w-full py-3 rounded text-white font-bold text-sm transition-colors hover:opacity-90 active:scale-[0.99] flex items-center justify-center gap-2"
                       style={{backgroundColor: TEAL}}

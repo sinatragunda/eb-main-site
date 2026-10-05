@@ -1,5 +1,5 @@
 export { http, getAuthToken, setAuthToken } from "./httpClient";
-export { authService } from "./authService";
+export { AuthService } from "./authService";
 export { HttpError } from "./types";
 export type {
   RequestOptions,

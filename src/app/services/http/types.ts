@@ -40,6 +40,9 @@ export type CreateDefaultAccountRequest = {
   email: string;
   alias: string;
   clientName: string;
+  /** Used as metadata for client / tenant provisioning */
+  rootPassword: string;
+  metadata?: Record<string, string>;
 };
 
 export type CreateDefaultAccountResponse = {

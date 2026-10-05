@@ -1,6 +1,6 @@
 import { useState, memo } from "react";
 import { Check } from "lucide-react";
-import { NAVY, TEAL } from "../../constants/brand";
+import { MIST, NAVY, TEAL } from "../../constants/brand";
 import type { Service, PricingTier, CartItem } from "../../types/marketplace";
 import { StarRating } from "./StarRating";
 
@@ -27,7 +27,7 @@ export const ServiceCard = memo(function ServiceCard({
       <div className="p-4 border-b border-border">
         <div className="flex items-start justify-between mb-2">
           <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: "#ddf0f4", color: TEAL }}>
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: MIST, color: TEAL }}>
               {service.icon}
             </div>
             <div>
@@ -86,7 +86,7 @@ export const ServiceCard = memo(function ServiceCard({
             </>
           )}
           {tier.popular && (
-            <span className="ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded" style={{ backgroundColor: "#ddf0f4", color: TEAL }}>
+            <span className="ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded" style={{ backgroundColor: MIST, color: TEAL }}>
               Most Popular
             </span>
           )}

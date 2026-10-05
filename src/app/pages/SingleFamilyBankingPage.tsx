@@ -9,7 +9,7 @@ import {
   Check,
   ArrowRight,
 } from "lucide-react";
-import { GOLD, NAVY, TEAL } from "../constants/brand";
+import { CREAM, GOLD, MIST, NAVY, TEAL } from "../constants/brand";
 import { SharedNav } from "../components/layout/SharedNav";
 import { SharedFooter } from "../components/layout/SharedFooter";
 
@@ -70,7 +70,7 @@ export function SingleFamilyBankingPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-white text-foreground" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+    <div className="min-h-screen text-foreground" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", backgroundColor: CREAM }}>
       <SharedNav />
 
       {/* Hero */}
@@ -133,10 +133,10 @@ export function SingleFamilyBankingPage() {
           {products.map((p) => (
             <div key={p.name} className="border border-border rounded-xl p-5 flex flex-col hover:shadow-md transition-shadow bg-white">
               <div className="flex items-start justify-between mb-3">
-                <div className="w-11 h-11 rounded-lg flex items-center justify-center" style={{ backgroundColor: "#ddf0f4", color: TEAL }}>
+                <div className="w-11 h-11 rounded-lg flex items-center justify-center" style={{ backgroundColor: MIST, color: TEAL }}>
                   {p.icon}
                 </div>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "#ddf0f4", color: TEAL }}>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: MIST, color: TEAL }}>
                   {p.tag}
                 </span>
               </div>
